@@ -1,12 +1,14 @@
 import cluster
 
-def buildDict():
+def buildDict(postID):
     user_votes = {}
     user_trust = {}
     for user in cluster.db.users.find():
-        user_votes[user['name']] = user['votes']
+        if postID in user['votes']:
+            user_votes[user['name']] = user['votes']
     for user in cluster.db.users.find():
-        user_trust[user['name']] = user['trust']
+        if postID in user['trust']:
+            user_trust[user['name']] = user['trust']
     return user_votes, user_trust
 
 def heuristic(postId):
