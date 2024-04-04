@@ -56,7 +56,7 @@ function getUser(userName) {
 }
 
 //method to add a vote into the votes collection
-//votes are: -2 for definitely fake news, -1 for probably fake news, 0 for unsure, 1 for probably real news, 2 for definitely real news
+//Definitely Fake News (0-20), Probably Fake News(21-40), Undecided(41-60), Probably Real News(61-80), Definitely Real News (81-100)
 function insertVote(userName, siteName, vote){
   db.getCollection('votes').insertOne({
     user: userName,
@@ -92,3 +92,4 @@ function getVotesByUser(userName){
 function getVotesBySite(siteName){
   return db.getCollection('votes').find({ site: siteName });
 }
+  
