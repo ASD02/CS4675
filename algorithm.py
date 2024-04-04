@@ -1,8 +1,8 @@
 
+def heuristic(postId, user_votes, user_trust):
 
-def heuristic(postId):
-
-    # Placeholders for the data    
+    # Placeholders for the data  
+    '''
     user_votes = {
         'trusted_user_1': 1,
         'trusted_user_2': -1,
@@ -16,6 +16,7 @@ def heuristic(postId):
         'untrusted_user_1': False,
         'untrusted_user_2': False,
     }
+    '''
 
 
     nlp_model_prediction = True
