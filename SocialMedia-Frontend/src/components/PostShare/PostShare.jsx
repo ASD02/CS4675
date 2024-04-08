@@ -42,7 +42,7 @@ const PostShare = () => {
           </div>{" "}
           <div className="option" style={{ color: "var(--shedule)" }}>
             <UilSchedule />
-            Shedule
+            Schedule
           </div>
           <button className="button ps-button">Share</button>
           <div style={{ display: "none" }}>
