@@ -4,79 +4,84 @@ from pymongo import MongoClient
 client = MongoClient('mongodb+srv://adithdevakonda:CS4675@cluster0.dlwhjzr.mongodb.net/')
 db = client['Cluster0']
 
-# Method to insert data into the sites collection
-def insertSites(siteName, siteURL, siteData, siteVotes):
-    db.sites.insert_one({
-        'name': siteName,
-        'url': siteURL,
-        'data': siteData,
-        'votes': siteVotes
+# Method to insert data into the post collection
+def insertPost(postID, modPred, userID, trustScore):
+    db.posts.insert_one({
+        'postID': siteName,
+        'siteURL': siteURL,
+        'userID': userID,
+        'trustScore': trustScore
     })
 
-# Method to update the votes of a site
-def updateVotes(siteName, newVotes):
-    db.sites.update_one(
-        {'name': siteName},
-        {'$set': {'votes': newVotes}}
+# Method to update the votes of a post
+def updateVotes(postID, trustScore):
+    db.posts.update_one(
+        {'postID': postID},
+        {'trustScore': trustScore}
     )
 
-# Method to delete a site from the collection
-def deleteSite(siteName):
-    db.sites.delete_one({'name': siteName})
+# Method to delete a post from the collection
+def deletePost(postID):
+    db.posts.delete_one({'postID': postID})
 
 # Method to get a site by name
-def getSite(siteName):
-    return db.sites.find_one({'name': siteName})
+def getPost(postID):
+    return db.sites.find_one({'postID': postID})
 
 # Method to insert user into the Users collection
-def insertUser(userName, userVotes):
+def insertUser(userID, userTrustScore, isTrustedUser):
     db.users.insert_one({
-        'name': userName,
-        'votes': userVotes
+        'userID': userID,
+        'userTrustScore': userTrustScore,
+        'isTrustedUser': isTrustedUser
     })
 
-# Method to update the votes of a user
-def updateUser(userName, newVotes):
+# Method to trust score the votes of a user
+def updateUser(userID, userTrustScore, isTrustedUser):
     db.users.update_one(
-        {'name': userName},
-        {'$set': {'votes': newVotes}}
+        {'userID': userID},
+        {'userTrustScore': userTrustScore},
+        {'isTrustedUser': isTrustedUser}
     )
 
 # Method to delete a user from the collection
-def deleteUser(userName):
-    db.users.delete_one({'name': userName})
+def deleteUser(userID):
+    db.users.delete_one({'userID': userID})
 
-# Method to get a user by name
-def getUser(userName):
-    return db.users.find_one({'name': userName})
+# Method to get a user by ID
+def getUser(userID):
+    return db.users.find_one({'userID': userID})
 
 # Method to add a vote into the votes collection
-def insertVote(userName, siteName, vote):
+def insertVote(userID, siteName, vote, postID, voteID):
     db.votes.insert_one({
-        'user': userName,
+        'user': userID,
         'site': siteName,
-        'vote': vote
+        'vote': vote,
+        'postID': postID,
+        'voteID': voteID
     })
 
 # Method to update a vote in the votes collection
-def updateVote(userName, siteName, newVote):
+def updateVote(userID, postID, vote, voteID):
     db.votes.update_one(
-        {'user': userName, 'site': siteName},
-        {'$set': {'vote': newVote}}
+        {'user': userID, 'postID': postID},
+        {'vote': vote},
+        {'voteID': voteID}
     )
 
 # Method to delete a vote from the collection
-def deleteVote(userName, siteName):
-    db.votes.delete_one({'user': userName, 'site': siteName})
+def deleteVote(userID, postID):
+    db.votes.delete_one({'user': userID, 'postID': postID})
 
-# Method to get a vote by user and site
-def getVote(userName, siteName):
-    return db.votes.find_one({'user': userName, 'site': siteName})
+# Method to get a vote by user and post
+def getVote(userID, postID):
+    return db.votes.find_one({'user': userID, 'postID': postID})
 
 # Method to get all votes by user
-def getVotesByUser(userName):
-    return db.votes.find({'user': userName})
+def getVotesByUser(userID):
+    return db.votes.find({'user': userID})
 
-# Method to get all votes by site
-def getVotesBySite(siteName):
-    return db.votes.find({'site': siteName})
+# Method to get all votes by post
+def getVotesByPost(postID):
+    return db.votes.find({'post ID': postID})
