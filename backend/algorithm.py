@@ -1,25 +1,22 @@
 
-def heuristic(postId, user_votes, user_trust):
+def heuristic(nlp_model_prediction: int, user_votes: dict, user_trust: dict) -> int:
 
     # Placeholders for the data  
     '''
     user_votes = {
-        'trusted_user_1': 1,
-        'trusted_user_2': -1,
-        'untrusted_user_1': 1,
-        'untrusted_user_2': 1,
+        'trusted_user_id_1': 1,
+        'trusted_user_id_2': -1,
+        'untrusted_user_id_1': 1,
+        'untrusted_user_id_2': 1,
     }
 
     user_trust = {
-        'trusted_user_1': True,
-        'trusted_user_2': True,
-        'untrusted_user_1': False,
-        'untrusted_user_2': False,
+        'trusted_user_id_1': True,
+        'trusted_user_id_2': True,
+        'untrusted_user_id_1': False,
+        'untrusted_user_id_2': False,
     }
     '''
-
-
-    nlp_model_prediction = True
 
     # Initialize variables
     trusted_votes = []
@@ -37,12 +34,13 @@ def heuristic(postId, user_votes, user_trust):
     untrusted_average = sum(untrusted_votes) / len(untrusted_votes) if untrusted_votes else 0
 
     # weights
-    trusted_weight = 0.35 
+    trusted_weight = 0.35
     untrusted_weight = 0.15
-    nlp_weight = 0.5  
+    nlp_weight = 0.5
 
     # NLP model prediction to a score
-    if nlp_model_prediction:
+    # TODO: Figure out how to score an opinion
+    if nlp_model_prediction > 0:
         nlp_model_score = 1 
     else:
         nlp_model_score = -1
@@ -55,6 +53,6 @@ def heuristic(postId, user_votes, user_trust):
     )
 
     # range 0 - 100
-    normalized_trust_score = (((overall_trust_score + 1) / 2) * 100)
+    normalized_trust_score = int(((overall_trust_score + 1) / 2) * 100)
 
     return normalized_trust_score
