@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "MisinfoVote",
+  "description": "Vote to defeat misinformation",
+  "version": "1.0",
+  "action": {
+    "default_popup": "hello.html",
+    "default_icon": "images/buzz.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://localhost:3000/*"],
+      "js": ["gauge.min.js", "content-script.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["images/check-mark.png", "images/flag.png"],
+      "matches": ["http://localhost:3000/*"]
+    }
+  ]
+}

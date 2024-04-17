@@ -8,7 +8,7 @@ import NotLike from '../../img/notlike.png'
 
 const Post = ({data}) => {
   return (
-    <div className="Post">
+    <div className="Post" id={data.id}>
         <img src={data.img} alt="" />
 
         <div className="detail">

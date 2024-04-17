@@ -1,0 +1,1 @@
+Download the model weights from the following link [https://drive.google.com/file/d/1khpMMs_Ui9WuK0CKt_qiYYstnB9aGzj0/view?usp=sharing](https://drive.google.com/file/d/1khpMMs_Ui9WuK0CKt_qiYYstnB9aGzj0/view?usp=sharing) and unzip them in this directory as `bert-model`.

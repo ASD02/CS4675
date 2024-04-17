@@ -1,0 +1,14 @@
+.vote-button {
+    background-color: white;
+    border: 0;
+    padding: 0;
+}
+
+.vote-button > img {
+    width: 26px;
+}
+
+canvas {
+    height: 26px;
+    width: 30px;
+}
