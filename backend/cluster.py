@@ -1,5 +1,8 @@
+from dotenv import load_dotenv
 from os import environ as env
 from pymongo import MongoClient
+
+load_dotenv()
 
 # Connect to the MongoDB database
 client = MongoClient(f'mongodb://{env.get('DB_USER')}:{env.get('DB_PASSWORD')}@{env.get('DB_ENDPOINT')}')
