@@ -1,13 +1,18 @@
+from dotenv import load_dotenv
+from os import environ as env
 from pymongo import MongoClient
 
+load_dotenv()
+
 # Connect to the MongoDB database
-client = MongoClient('mongodb+srv://adithdevakonda:CS4675@cluster0.dlwhjzr.mongodb.net/')
-db = client['Cluster0']
+client = MongoClient(f'mongodb://{env.get('DB_USER')}:{env.get('DB_PASSWORD')}@{env.get('DB_ENDPOINT')}')
+db = client[f'{env.get('DB_NAME')}']
 
 # Method to insert data into the post collection
 def insertPost(postID, userID, trustScore, votesTrusted, avgTrusted, votesUntrusted, avgUntrusted):
     db.posts.insert_one({
-        'postID': postID,
+        'postID': siteName,
+        'siteURL': siteURL,
         'userID': userID,
         'trustScore': trustScore,
         'votesTrusted': votesTrusted,
@@ -17,23 +22,19 @@ def insertPost(postID, userID, trustScore, votesTrusted, avgTrusted, votesUntrus
     })
 
 # Method to update the votes of a post
-def updateVotes(postID, trustScore, votesTrusted, avgTrusted, votesUntrusted, avgUntrusted):
+def updateVotes(postID, trustScore):
     db.posts.update_one(
         {'postID': postID},
-        {'trustScore': trustScore},
-        {'votesTrusted': votesTrusted},
-        {'avgTrusted': avgTrusted},
-        {'votesUntrusted': votesUntrusted},
-        {'avgUntrusted': avgUntrusted}
+        {'trustScore': trustScore}
     )
 
 # Method to delete a post from the collection
 def deletePost(postID):
     db.posts.delete_one({'postID': postID})
 
-# Method to get a site by name
+# Method to get a post by ID
 def getPost(postID):
-    return db.sites.find_one({'postID': postID})
+    return db.posts.find_one({'postID': postID})
 
 # Method to insert user into the Users collection
 def insertUser(userID, userTrustScore, isTrustedUser):
@@ -47,8 +48,11 @@ def insertUser(userID, userTrustScore, isTrustedUser):
 def updateUser(userID, userTrustScore, isTrustedUser):
     db.users.update_one(
         {'userID': userID},
-        {'userTrustScore': userTrustScore},
-        {'isTrustedUser': isTrustedUser}
+        {'$set': {
+            'userTrustScore': userTrustScore, 
+            'isTrustedUser': isTrustedUser
+            }
+        }
     )
 
 # Method to delete a user from the collection
@@ -59,22 +63,23 @@ def deleteUser(userID):
 def getUser(userID):
     return db.users.find_one({'userID': userID})
 
+# Get multiple users
+def getUsers(userIDs):
+    return list(db.users.find({'userID': {'$in': userIDs}}))
+
 # Method to add a vote into the votes collection
-def insertVote(userID, siteName, vote, postID, voteID):
+def insertVote(userID, vote, postID):
     db.votes.insert_one({
         'user': userID,
-        'site': siteName,
         'vote': vote,
-        'postID': postID,
-        'voteID': voteID
+        'postID': postID
     })
 
 # Method to update a vote in the votes collection
-def updateVote(userID, postID, vote, voteID):
+def updateVote(userID, postID, vote):
     db.votes.update_one(
         {'user': userID, 'postID': postID},
-        {'vote': vote},
-        {'voteID': voteID}
+        {'$set': {'vote': vote}}
     )
 
 # Method to delete a vote from the collection
@@ -87,8 +92,8 @@ def getVote(userID, postID):
 
 # Method to get all votes by user
 def getVotesByUser(userID):
-    return db.votes.find({'user': userID})
+    return list(db.votes.find({'user': userID}))
 
 # Method to get all votes by post
 def getVotesByPost(postID):
-    return db.votes.find({'post ID': postID})
+    return list(db.votes.find({'post ID': postID}))
