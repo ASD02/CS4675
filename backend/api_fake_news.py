@@ -19,7 +19,7 @@ def classify_text(news: str) -> int:
     if predictions[0] == 2:
         classification = 1              # 'True'
     elif predictions[0] == 1:
-        classification = -1              # 'Fake'
+        classification = -1             # 'Fake'
     else:
         classification = 0              # 'Opinion'
     return classification

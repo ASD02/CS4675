@@ -1,7 +1,47 @@
+from cluster import getUser
+
+
+nlp_weight = 0.3
+
+# Weights for trusted source
+t_trusted_voter = 0.35
+t_untrusted_voter = 0.25
+t_source = 0.1
+
+# Weights for untrusted source
+u_trusted_voter = 0.40
+u_untrusted_voter = 0.3
+
+
+def calculate_trust_score(post_info) -> int:
+    trusted_average = post_info['avgTrusted']
+    untrusted_average = post_info['avgUntrusted']
+    nlp_model_score = post_info['modPred']
+
+    if nlp_model_score == 0:
+        # If opinion, do not score the post
+        return -1
+    else:
+        # Calculate the overall trust score
+        if getUser(post_info['userID'])['isTrustedUser']:
+            overall_trust_score = (
+                (trusted_average * t_trusted_voter) +
+                (untrusted_average * t_untrusted_voter) +
+                (nlp_model_score * nlp_weight) +
+                t_source
+            )
+        else:
+            overall_trust_score = (
+                (trusted_average * u_trusted_voter) +
+                (untrusted_average * u_untrusted_voter) +
+                (nlp_model_score * nlp_weight)
+            )
+
+        # range 0 - 100
+        return int(((overall_trust_score + 1) / 2) * 100)
+
 
 def heuristic(nlp_model_prediction: int, user_votes: dict, user_trust: dict) -> int:
-
-    # Placeholders for the data  
     '''
     user_votes = {
         'trusted_user_id_1': 1,

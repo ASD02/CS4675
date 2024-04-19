@@ -1,8 +1,9 @@
 import api_fake_news
 import cluster
-from algorithm import heuristic
+from algorithm import calculate_trust_score
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from utils import *
 
 
 NEUTRAL_POST_TRUST_SCORE = '50'
@@ -14,21 +15,15 @@ CORS(app)
 
 @app.route("/score/<post_id>", methods=['GET'])
 def get_score(post_id):
-    user_votes_raw = cluster.getVotesByPost(post_id)
-    user_votes = {}
-    for _vote in user_votes_raw:
-        user_votes[_vote['user']] = _vote["vote"]
-    users_raw = cluster.getUsers([_vote['user'] for _vote in user_votes_raw])
-    user_trust_scores = {}
-    for _user in users_raw:
-        user_trust_scores[_user['userID']] = _user["userTrustScore"]
-    model_prediction = cluster.getPost(post_id)['modPred']
+    post_info = cluster.getPost(post_id)
+
+    trust_score = calculate_trust_score(post_info)
 
     result = {}
-    result['score'] = heuristic(model_prediction, user_votes, user_trust_scores)
-    result['positive_votes'] = sum([1 for _ in user_votes if user_votes[_] > 0])
-    result['negative_votes'] = len(user_votes) - result["positive_votes"]
-    result['model_prediction'] = model_prediction
+    result['score'] = trust_score
+    result['positive_votes'] = post_info['votesTrusted']
+    result['negative_votes'] = post_info['votesUntrusted']
+    result['model_prediction'] = post_info['modPred']
 
     return jsonify(result)
 
@@ -37,23 +32,42 @@ def get_score(post_id):
 def vote(post_id):
     request_body = request.get_json()
     user_id = request_body.get("user_id")
-    user_vote = request_body.get("vote")
-    if not cluster.getVote(user_id, post_id) and not cluster.getPost(post_id)['userID'] == user_id :
+    user_vote = int(request_body.get("vote"))
+    
+    if not user_id and not user_vote:
+        return '', 400
+    
+    post_info = cluster.getPost(post_id)
+    if not cluster.getVote(user_id, post_id) and not post_info['userID'] == user_id and (user_vote == -1 or user_vote == 1):
         cluster.insertVote(user_id, user_vote, post_id)
-    return
+        update_post_vote_stats(user_id, user_vote, post_id, post_info)
+
 
 @app.route("/<post_id>", methods=['PUT'])
 def create_post(post_id):
     request_body = request.get_json()
-    post_text = request_body.get("text")
-    user_id = request_body.get("user_id")
+    post_text = request_body.get("text", "")
+    user_id = request_body.get("user_id", "")
+
+    if not post_text or not user_id:
+        return '', 400
+    
     model_prediction = api_fake_news.classify_text(post_text)
     if not cluster.getPost(post_id):
-        cluster.insertPost(post_id, model_prediction, user_id, NEUTRAL_POST_TRUST_SCORE)
+        cluster.insertPost(post_id, model_prediction, user_id, 0, 0, 0, 0)
     return
+
 
 @app.route("/<user_id>", methods=['PUT'])
 def create_user(user_id):
     if not cluster.getUser(user_id):
-        cluster.insertUser(user_id, 0, False)
+        cluster.insertUser(user_id, False)
     return
+
+
+@app.route('/<user_id>', method=['POST'])
+def update_user_trust(user_id):
+    request_body = request.get_json()
+    is_trusted_user = request_body.get("isTrusted", "")
+    if is_trusted_user:
+        cluster.updateUser(user_id, is_trusted_user)

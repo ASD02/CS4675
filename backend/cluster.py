@@ -9,19 +9,37 @@ client = MongoClient(f'mongodb://{env.get('DB_USER')}:{env.get('DB_PASSWORD')}@{
 db = client[f'{env.get('DB_NAME')}']
 
 # Method to insert data into the post collection
-def insertPost(postID, modPred, userID, trustScore):
+def insertPost(postID, modPred, userID, votesTrusted, avgTrusted, votesUntrusted, avgUntrusted):
     db.posts.insert_one({
         'postID': postID,
-        'modPred': modPred,
         'userID': userID,
-        'trustScore': trustScore
+        'modPred': modPred,
+        'votesTrusted': votesTrusted,
+        'avgTrusted': avgTrusted,
+        'votesUntrusted': votesUntrusted,
+        'avgUntrusted': avgUntrusted
     })
 
-# Method to update the trust score of a post
-def updateTrustScore(postID, trustScore):
+# Method to update the trust stats of a post
+def updatePostTrusted(postID, votesTrusted, avgTrusted):
     db.posts.update_one(
         {'postID': postID},
-        {'$set': {'trustScore': trustScore}}
+        {'$set': {
+            'votesTrusted': votesTrusted,
+            'avgTrusted': avgTrusted
+            }
+        }
+    )
+
+# Method to update the untrusted stats of a post
+def updatePostUntrusted(postID, votesUntrusted, avgUntrusted):
+    db.posts.update_one(
+        {'postID': postID},
+        {'$set': {
+            'votesUntrusted': votesUntrusted,
+            'avgUntrusted': avgUntrusted
+            }
+        }
     )
 
 # Method to delete a post from the collection
@@ -33,19 +51,17 @@ def getPost(postID):
     return db.posts.find_one({'postID': postID})
 
 # Method to insert user into the Users collection
-def insertUser(userID, userTrustScore, isTrustedUser):
+def insertUser(userID, isTrustedUser):
     db.users.insert_one({
         'userID': userID,
-        'userTrustScore': userTrustScore,
         'isTrustedUser': isTrustedUser
     })
 
 # Method to trust score the votes of a user
-def updateUser(userID, userTrustScore, isTrustedUser):
+def updateUser(userID, isTrustedUser):
     db.users.update_one(
         {'userID': userID},
         {'$set': {
-            'userTrustScore': userTrustScore, 
             'isTrustedUser': isTrustedUser
             }
         }
