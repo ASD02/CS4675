@@ -5,19 +5,26 @@ client = MongoClient('mongodb+srv://adithdevakonda:CS4675@cluster0.dlwhjzr.mongo
 db = client['Cluster0']
 
 # Method to insert data into the post collection
-def insertPost(postID, modPred, userID, trustScore):
+def insertPost(postID, userID, trustScore, votesTrusted, avgTrusted, votesUntrusted, avgUntrusted):
     db.posts.insert_one({
-        'postID': siteName,
-        'siteURL': siteURL,
+        'postID': postID,
         'userID': userID,
-        'trustScore': trustScore
+        'trustScore': trustScore,
+        'votesTrusted': votesTrusted,
+        'avgTrusted': avgTrusted,
+        'votesUntrusted': votesUntrusted,
+        'avgUntrusted': avgUntrusted
     })
 
 # Method to update the votes of a post
-def updateVotes(postID, trustScore):
+def updateVotes(postID, trustScore, votesTrusted, avgTrusted, votesUntrusted, avgUntrusted):
     db.posts.update_one(
         {'postID': postID},
-        {'trustScore': trustScore}
+        {'trustScore': trustScore},
+        {'votesTrusted': votesTrusted},
+        {'avgTrusted': avgTrusted},
+        {'votesUntrusted': votesUntrusted},
+        {'avgUntrusted': avgUntrusted}
     )
 
 # Method to delete a post from the collection
