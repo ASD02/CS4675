@@ -1,12 +1,20 @@
 from dotenv import load_dotenv
 from os import environ as env
 from pymongo import MongoClient
+from pymongo.server_api import ServerApi
 
 load_dotenv()
 
 # Connect to the MongoDB database
-client = MongoClient(f'mongodb://{env.get('DB_USER')}:{env.get('DB_PASSWORD')}@{env.get('DB_ENDPOINT')}')
+client = MongoClient(f'mongodb+srv://{env.get('DB_USER')}:{env.get('DB_PASSWORD')}@{env.get('DB_ENDPOINT')}/?retryWrites=true&w=majority&appName=Cluster0', server_api=ServerApi('1'))
 db = client[f'{env.get('DB_NAME')}']
+
+# Send a ping to confirm a successful connection
+try:
+    db.command('ping')
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except Exception as e:
+    print(e)
 
 # Method to insert data into the post collection
 def insertPost(postID, modPred, userID, votesTrusted, avgTrusted, votesUntrusted, avgUntrusted):
@@ -19,6 +27,7 @@ def insertPost(postID, modPred, userID, votesTrusted, avgTrusted, votesUntrusted
         'votesUntrusted': votesUntrusted,
         'avgUntrusted': avgUntrusted
     })
+    return
 
 # Method to update the trust stats of a post
 def updatePostTrusted(postID, votesTrusted, avgTrusted):
@@ -30,6 +39,7 @@ def updatePostTrusted(postID, votesTrusted, avgTrusted):
             }
         }
     )
+    return
 
 # Method to update the untrusted stats of a post
 def updatePostUntrusted(postID, votesUntrusted, avgUntrusted):
@@ -41,10 +51,12 @@ def updatePostUntrusted(postID, votesUntrusted, avgUntrusted):
             }
         }
     )
+    return
 
 # Method to delete a post from the collection
 def deletePost(postID):
     db.posts.delete_one({'postID': postID})
+    return
 
 # Method to get a post by ID
 def getPost(postID):
@@ -56,6 +68,7 @@ def insertUser(userID, isTrustedUser):
         'userID': userID,
         'isTrustedUser': isTrustedUser
     })
+    return
 
 # Method to trust score the votes of a user
 def updateUser(userID, isTrustedUser):
@@ -66,10 +79,12 @@ def updateUser(userID, isTrustedUser):
             }
         }
     )
+    return
 
 # Method to delete a user from the collection
 def deleteUser(userID):
     db.users.delete_one({'userID': userID})
+    return
 
 # Method to get a user by ID
 def getUser(userID):
@@ -86,6 +101,7 @@ def insertVote(userID, vote, postID):
         'vote': vote,
         'postID': postID
     })
+    return
 
 # Method to update a vote in the votes collection
 def updateVote(userID, postID, vote):
@@ -93,10 +109,12 @@ def updateVote(userID, postID, vote):
         {'user': userID, 'postID': postID},
         {'$set': {'vote': vote}}
     )
+    return
 
 # Method to delete a vote from the collection
 def deleteVote(userID, postID):
     db.votes.delete_one({'user': userID, 'postID': postID})
+    return
 
 # Method to get a vote by user and post
 def getVote(userID, postID):

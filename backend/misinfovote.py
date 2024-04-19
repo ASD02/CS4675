@@ -6,9 +6,6 @@ from flask_cors import CORS
 from utils import *
 
 
-NEUTRAL_POST_TRUST_SCORE = '50'
-
-
 app = Flask(__name__)
 CORS(app)
 
@@ -16,6 +13,9 @@ CORS(app)
 @app.route("/score/<post_id>", methods=['GET'])
 def get_score(post_id):
     post_info = cluster.getPost(post_id)
+
+    if not post_info:
+        return '', 400
 
     trust_score = calculate_trust_score(post_info)
 
@@ -25,49 +25,55 @@ def get_score(post_id):
     result['negative_votes'] = post_info['votesUntrusted']
     result['model_prediction'] = post_info['modPred']
 
-    return jsonify(result)
+    return jsonify(result), 200
 
 
-@app.route("/vote/<post_id>", methods=['POST'])
-def vote(post_id):
+@app.route("/vote", methods=['POST'])
+def vote():
     request_body = request.get_json()
-    user_id = request_body.get("user_id")
-    user_vote = int(request_body.get("vote"))
-    
-    if not user_id and not user_vote:
-        return '', 400
+    post_id = request_body.get("post_id", "")
+    user_id = request_body.get("user_id", "")
+    user_vote = request_body.get("vote", "")
     
     post_info = cluster.getPost(post_id)
+
+    if not post_id or not user_id or not user_vote or not cluster.getUser(user_id) or not post_info:
+        return '', 400
+    
+    user_vote = int(user_vote)
+    
     if not cluster.getVote(user_id, post_id) and not post_info['userID'] == user_id and (user_vote == -1 or user_vote == 1):
         cluster.insertVote(user_id, user_vote, post_id)
         update_post_vote_stats(user_id, user_vote, post_id, post_info)
+    return '', 200
 
 
-@app.route("/<post_id>", methods=['PUT'])
+@app.route("/posts/<post_id>", methods=['PUT'])
 def create_post(post_id):
     request_body = request.get_json()
     post_text = request_body.get("text", "")
     user_id = request_body.get("user_id", "")
 
-    if not post_text or not user_id:
+    if not post_text or not user_id or not cluster.getUser(user_id):
         return '', 400
-    
+
     model_prediction = api_fake_news.classify_text(post_text)
     if not cluster.getPost(post_id):
         cluster.insertPost(post_id, model_prediction, user_id, 0, 0, 0, 0)
-    return
+    return '', 200
 
 
-@app.route("/<user_id>", methods=['PUT'])
+@app.route("/users/<user_id>", methods=['PUT'])
 def create_user(user_id):
     if not cluster.getUser(user_id):
         cluster.insertUser(user_id, False)
-    return
+    return '', 200
 
 
-@app.route('/<user_id>', method=['POST'])
+@app.route('/trust/<user_id>', methods=['POST'])
 def update_user_trust(user_id):
     request_body = request.get_json()
     is_trusted_user = request_body.get("isTrusted", "")
-    if is_trusted_user:
+    if is_trusted_user and cluster.getUser(user_id):
         cluster.updateUser(user_id, is_trusted_user)
+    return '', 200
