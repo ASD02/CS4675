@@ -21,8 +21,6 @@ def get_score(post_id):
 
     result = {}
     result['score'] = trust_score
-    result['positive_votes'] = post_info['votesTrusted']
-    result['negative_votes'] = post_info['votesUntrusted']
     result['model_prediction'] = post_info['modPred']
 
     return jsonify(result), 200
