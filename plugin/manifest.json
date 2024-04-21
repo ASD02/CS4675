@@ -16,7 +16,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["images/check-mark.png", "images/flag.png"],
+      "resources": ["images/check-mark.png", "images/flag.png", "images/opinion.png"],
       "matches": ["http://localhost:3000/*"]
     }
   ]
