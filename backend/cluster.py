@@ -132,8 +132,10 @@ def getVotesByPost(postID):
 
 
 def generateFakeData(num_records):
+    postIDs = [_ for _ in range(num_records)]
+    random.shuffle(postIDs)
     for _ in range(num_records):
-        postID = str(random.randint(0, num_records))
+        postID = str(postIDs[_])
         userID = str(random.randint(0, num_records//10))
         modPred = random.choice([-1, 0, 1])
         votesTrusted = random.randint(0, 100)
