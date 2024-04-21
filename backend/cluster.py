@@ -131,21 +131,16 @@ def getVotesByPost(postID):
     return list(db.votes.find({'post ID': postID}))
 
 
-
-def randomString(length):
-    letters = string.ascii_letters
-    return ''.join(random.choice(letters) for _ in range(length))
-
 def generateFakeData(num_records):
     for _ in range(num_records):
-        postID = randomString(10)
-        userID = randomString(10)
-        modPred = random.uniform(0, 1)
+        postID = str(random.randint(0, num_records))
+        userID = str(random.randint(0, num_records//10))
+        modPred = random.choice([-1, 0, 1])
         votesTrusted = random.randint(0, 100)
-        avgTrusted = random.uniform(0, 100)
-        votesUntrusted = random.randint(0, 100)
-        avgUntrusted = random.uniform(0, 100)
+        avgTrusted = random.uniform(-1, 1)
+        votesUntrusted = random.randint(0, num_records*10)
+        avgUntrusted = random.uniform(-1, 1)
         insertPost(postID, modPred, userID, votesTrusted, avgTrusted, votesUntrusted, avgUntrusted)
         insertUser(userID, random.choice([True, False]))
 
-generateFakeData(100000)
+generateFakeData(1000)
