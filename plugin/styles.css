@@ -4,7 +4,7 @@
     padding: 0;
 }
 
-.vote-button > img {
+.vote-button > img, .opinion-image {
     width: 26px;
 }
 

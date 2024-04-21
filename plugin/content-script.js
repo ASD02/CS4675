@@ -14,31 +14,91 @@ var opts = {
     highDpiSupport: true
 };
 
+const user_id = "525";
+
 let posts = document.getElementsByClassName("Post")
 
 for (let post_element of posts) {
-    post_react = post_element.getElementsByClassName("postReact").item(0)
+    let post_id = post_element.id
 
-    let upvoteButton = document.createElement("button");
-    upvoteButton.className = "vote-button";
-    let upvoteImage = document.createElement("img");
-    upvoteImage.src = chrome.runtime.getURL("images/check-mark.png");;
-    upvoteButton.appendChild(upvoteImage);
-    post_react.appendChild(upvoteButton);
+    const request = new Request(`http://localhost:5000/score/${post_id}`, {
+        method: "GET"
+    });
+    fetch(request)
+        .then(
+            (response) => {
+                let post_react = post_element.getElementsByClassName("postReact").item(0)
 
-    let downvoteButton = document.createElement("button");
-    downvoteButton.className = "vote-button";
-    let downvoteImage = document.createElement("img");
-    downvoteImage.src = chrome.runtime.getURL("images/flag.png");;
-    downvoteButton.appendChild(downvoteImage);
-    post_react.appendChild(downvoteButton);
+                let upvoteButton = document.createElement("button");
+                upvoteButton.className = "vote-button";
+                let upvoteImage = document.createElement("img");
+                upvoteImage.src = chrome.runtime.getURL("images/check-mark.png");
+                upvoteButton.appendChild(upvoteImage);
+                post_react.appendChild(upvoteButton);
+                upvoteButton.onclick = () => {
+                    const voteRequest = new Request("http://localhost:5000/vote", {
+                        method: "POST",
+                        body: JSON.stringify(
+                            {
+                                "post_id": post_id,
+                                "user_id": user_id,
+                                "vote": 1
+                            }
+                        ),
+                        headers: new Headers({
+                            "Content-Type": "application/json"
+                        })
+                    });
+                    fetch(voteRequest);
+                }
 
-    let gaugeTarget = document.createElement("canvas");
-    post_react.appendChild(gaugeTarget);
+                let downvoteButton = document.createElement("button");
+                downvoteButton.className = "vote-button";
+                let downvoteImage = document.createElement("img");
+                downvoteImage.src = chrome.runtime.getURL("images/flag.png");
+                downvoteButton.appendChild(downvoteImage);
+                post_react.appendChild(downvoteButton);
+                downvoteButton.onclick = () => {
+                    const voteRequest = new Request("http://localhost:5000/vote", {
+                        method: "POST",
+                        body: JSON.stringify(
+                            {
+                                "post_id": post_id,
+                                "user_id": user_id,
+                                "vote": -1
+                            }
+                        ),
+                        headers: new Headers({
+                            "Content-Type": "application/json"
+                        })
+                    });
+                    fetch(voteRequest);
+                }
 
-    let gauge = new Gauge(gaugeTarget).setOptions(opts);
-    gauge.maxValue = 100;
-    gauge.setMinValue(0);
-    gauge.animationSpeed = 32;
-    gauge.set(+Math.random()*100);
+                let gaugeTarget = document.createElement("canvas");
+                post_react.appendChild(gaugeTarget);
+
+                response.json().then((json_) => {
+                    let trustScore = json_['score'];
+                    if (trustScore == -1) {
+                        post_react.removeChild(gaugeTarget);
+                        let opinionImage = document.createElement("img");
+                        opinionImage.src = chrome.runtime.getURL("images/opinion.png");
+                        opinionImage.className = "opinion-image"
+                        opinionImage.title = "The model detected that this post is an opinion!"
+                        post_react.appendChild(opinionImage);
+                    } else {
+                        let gauge = new Gauge(gaugeTarget).setOptions(opts);
+                        gauge.maxValue = 100;
+                        gauge.setMinValue(0);
+                        gauge.animationSpeed = 32;
+                        gauge.set(json_['score']);
+
+                        gaugeTarget.title = `Trust Score: ${json_['score']}\nModel Prediction: ${json_['model_prediction'] == -1 ? 'Fake News' : 'True News'}`
+                    }
+                })
+            },
+            (error) => {
+                console.error(error);
+            });
 }
