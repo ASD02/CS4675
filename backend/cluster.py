@@ -2,6 +2,8 @@ from dotenv import load_dotenv
 from os import environ as env
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
+import random
+import string
 
 load_dotenv()
 
@@ -127,3 +129,24 @@ def getVotesByUser(userID):
 # Method to get all votes by post
 def getVotesByPost(postID):
     return list(db.votes.find({'post ID': postID}))
+
+
+
+def randomString(length):
+    letters = string.ascii_letters
+    return ''.join(random.choice(letters) for _ in range(length))
+
+def generateFakeData(num_records):
+    for _ in range(num_records):
+        postID = randomString(10)
+        userID = randomString(10)
+        modPred = random.uniform(0, 1)
+        votesTrusted = random.randint(0, 100)
+        avgTrusted = random.uniform(0, 100)
+        votesUntrusted = random.randint(0, 100)
+        avgUntrusted = random.uniform(0, 100)
+        insertPost(postID, modPred, userID, votesTrusted, avgTrusted, votesUntrusted, avgUntrusted)
+        insertUser(userID, random.choice([True, False]))
+        insertVote(userID, random.choice([-1, 0, 1]), postID)
+
+generateFakeData(100000)
