@@ -14,14 +14,13 @@ var opts = {
     highDpiSupport: true
 };
 
-const user_id = 525;
+const user_id = "525";
 
 let posts = document.getElementsByClassName("Post")
 
 for (let post_element of posts) {
     let post_id = post_element.id
 
-    // TODO: Call GET API to get score
     const request = new Request(`http://localhost:5000/score/${post_id}`, {
         method: "GET"
     });
@@ -36,7 +35,22 @@ for (let post_element of posts) {
                 upvoteImage.src = chrome.runtime.getURL("images/check-mark.png");
                 upvoteButton.appendChild(upvoteImage);
                 post_react.appendChild(upvoteButton);
-                // TODO: Add onClick listeners
+                upvoteButton.onclick = () => {
+                    const voteRequest = new Request("http://localhost:5000/vote", {
+                        method: "POST",
+                        body: JSON.stringify(
+                            {
+                                "post_id": post_id,
+                                "user_id": user_id,
+                                "vote": 1
+                            }
+                        ),
+                        headers: new Headers({
+                            "Content-Type": "application/json"
+                        })
+                    });
+                    fetch(voteRequest);
+                }
 
                 let downvoteButton = document.createElement("button");
                 downvoteButton.className = "vote-button";
@@ -44,7 +58,22 @@ for (let post_element of posts) {
                 downvoteImage.src = chrome.runtime.getURL("images/flag.png");
                 downvoteButton.appendChild(downvoteImage);
                 post_react.appendChild(downvoteButton);
-                // TODO: Add onClick listeners
+                downvoteButton.onclick = () => {
+                    const voteRequest = new Request("http://localhost:5000/vote", {
+                        method: "POST",
+                        body: JSON.stringify(
+                            {
+                                "post_id": post_id,
+                                "user_id": user_id,
+                                "vote": -1
+                            }
+                        ),
+                        headers: new Headers({
+                            "Content-Type": "application/json"
+                        })
+                    });
+                    fetch(voteRequest);
+                }
 
                 let gaugeTarget = document.createElement("canvas");
                 post_react.appendChild(gaugeTarget);
@@ -65,13 +94,7 @@ for (let post_element of posts) {
                         gauge.animationSpeed = 32;
                         gauge.set(json_['score']);
 
-                        gaugeTarget.title = `
-                        Trust Score: ${json_['score']}\n
-Upvotes: ${json_['positive_votes']}\n
-Downvotes: ${json_['negative_votes']}\n
-Model Prediction: ${json_['model_prediction'] == -1 ? 'Fake News' : 'True News'}\n
-                        `
-                        // TODO: Add tooltip (title) to display stats
+                        gaugeTarget.title = `Trust Score: ${json_['score']}\nModel Prediction: ${json_['model_prediction'] == -1 ? 'Fake News' : 'True News'}`
                     }
                 })
             },
