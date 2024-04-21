@@ -147,6 +147,5 @@ def generateFakeData(num_records):
         avgUntrusted = random.uniform(0, 100)
         insertPost(postID, modPred, userID, votesTrusted, avgTrusted, votesUntrusted, avgUntrusted)
         insertUser(userID, random.choice([True, False]))
-        insertVote(userID, random.choice([-1, 0, 1]), postID)
 
 generateFakeData(100000)
