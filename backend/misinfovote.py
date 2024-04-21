@@ -3,14 +3,19 @@ import cluster
 from algorithm import calculate_trust_score
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_caching import Cache
 from utils import *
 
 
 app = Flask(__name__)
 CORS(app)
 
+cache = Cache(config={'CACHE_TYPE': 'SimpleCache', 'CACHE_DEFAULT_TIMEOUT': 60})
+cache.init_app(app)
+
 
 @app.route("/score/<post_id>", methods=['GET'])
+@cache.cached(timeout=60)
 def get_score(post_id):
     post_info = cluster.getPost(post_id)
 
