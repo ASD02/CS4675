@@ -1,3 +1,4 @@
+import time
 import api_fake_news
 import cluster
 from algorithm import calculate_trust_score
@@ -17,6 +18,7 @@ cache.init_app(app)
 @app.route("/score/<post_id>", methods=['GET'])
 @cache.cached(timeout=60)
 def get_score(post_id):
+    start_ = time.time()
     post_info = cluster.getPost(post_id)
 
     if not post_info:
@@ -27,12 +29,16 @@ def get_score(post_id):
     result = {}
     result['score'] = trust_score
     result['model_prediction'] = post_info['modPred']
+    end_ = time.time()
+
+    print(f"get_score took {end_ - start_} seconds")
 
     return jsonify(result), 200
 
 
 @app.route("/vote", methods=['POST'])
 def vote():
+    start_ = time.time()
     request_body = request.get_json()
     post_id = request_body.get("post_id", "")
     user_id = request_body.get("user_id", "")
@@ -48,6 +54,10 @@ def vote():
     if not cluster.getVote(user_id, post_id) and not post_info['userID'] == user_id and (user_vote == -1 or user_vote == 1):
         cluster.insertVote(user_id, user_vote, post_id)
         update_post_vote_stats(user_id, user_vote, post_id, post_info)
+    end_ = time.time()
+
+    print(f"vote took {end_ - start_} seconds")
+
     return '', 200
 
 
