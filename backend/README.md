@@ -1,4 +1,4 @@
-# Misinfovote
+# MisinfoVote - Backend
 
 ## Setup
 
@@ -42,8 +42,25 @@ Install the required dependencies
 pip install -r requirements.txt
 ```
 
+
 ## Running the app
 
 ```
 flask --app misinfovote run
 ```
+The app will run on `localhost:5000`
+
+
+## API Documentation
+
+The following endpoints are exposed:
+
+| Endpoint | Method | Request Body (JSON fields) | Comment |
+| - | - | - | - |
+| /score/<post_id> | GET | None | Get the trust score of a post |
+| /vote | POST | post_id, user_id, vote | Vote on a particular post. User ID is for the voter, vote (string) can be either -1 or 1 |
+| /posts/<post_id> | PUT | text, user_id | Create a new post |
+| /users/<user_id> | PUT | None | Create a new untrusted user |
+| /trust/<user_id> | POST | isTrusted (bool) | Trust an untrusted user |
+
+If any of the required request body fields are missing, the response will be an HTTP 400.
